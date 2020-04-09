@@ -73,7 +73,7 @@ defmodule TwitterCastWeb.BotController do
   defp new_image(url) do
     %{
       type: "image",
-      originContentUrl: url,
+      originalContentUrl: url,
       previewImageUrl: url
     }
   end
