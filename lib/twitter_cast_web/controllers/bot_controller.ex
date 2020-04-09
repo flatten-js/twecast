@@ -15,7 +15,7 @@ defmodule TwitterCastWeb.BotController do
     case extract_tweet_id(message["text"]) do
       %{"tid" => tid} ->
         line_reply(conn, events, %{reply: %{tid: tid}})
-      _ -> resp(conn)
+      nil -> resp(conn)
     end
   end
 
@@ -94,7 +94,7 @@ defmodule TwitterCastWeb.BotController do
     |> Map.merge(action)
   end
 
-  def new_flex_action(type, data) do
+  defp new_flex_action(type, data) do
     %{
       action: %{
         type: type,
