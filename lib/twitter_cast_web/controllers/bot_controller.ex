@@ -11,7 +11,7 @@ defmodule TwitterCastWeb.BotController do
     end
   end
 
-  defp is_need_reply(conn, events, %{"message" => message}) do
+  defp is_need_reply(conn, events, message) do
     case extract_tweet_id(message["text"]) do
       %{"tid" => tid} ->
         line_reply(conn, events, %{reply: %{tid: tid}})
