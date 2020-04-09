@@ -115,6 +115,8 @@ defmodule TwitterCastWeb.BotController do
     content =
       media_url
       |> new_flex_image(new_flex_action("postback", media_url))
+
+    %{hero: content}
   end
 
   defp format_flex_message(tweet) do
