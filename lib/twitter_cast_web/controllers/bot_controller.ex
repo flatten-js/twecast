@@ -61,6 +61,8 @@ defmodule TwitterCastWeb.BotController do
     } |> Poison.encode!
   end
 
+  defp list_push(data, list), do: [list | [data]] |> List.flatten
+
   defp resp(conn) do
     send_resp(conn, :no_content, "")
   end
@@ -78,23 +80,29 @@ defmodule TwitterCastWeb.BotController do
     }
   end
 
-  defp new_flex_image(url) do
+  defp flex_image(%{url: url, ratio: ratio, mode: mode}) do
     %{
       type: "image",
       url: url,
-      aspectRatio: "150:98",
-      aspectMode: "cover",
+      aspectRatio: ratio,
+      aspectMode: mode,
       size: "full"
     }
   end
 
-  defp new_flex_image(url, action) do
-    url
-    |> new_flex_image
+  defp flex_image(opt, action) do
+    opt
+    |> new_image
     |> Map.merge(action)
   end
 
-  defp new_flex_action(type, data) do
+  defp flex_images(opts) do
+    opts |> Enum.map(fn opt ->
+      flex_image(opt, flex_action("postback", opt.url))
+    end)
+  end
+
+  defp flex_action(type, data) do
     %{
       action: %{
         type: type,
@@ -104,19 +112,78 @@ defmodule TwitterCastWeb.BotController do
     }
   end
 
-  defp extract_media_url(media) do
-    media
-    |> Enum.map(&(&1.media_url_https))
-    |> List.first
+  defp flex_social(media) do
+    template = %{
+      hero: %{
+        type: "box",
+        layout: "horizontal",
+        contents: []
+      },
+      opt: %{url: "", ratio: "", mode: "cover"}
+    }
+
+    aspect_ratio = social_aspect_ratio(length media)
+
+    contents =
+      media
+      |> Enum.reduce(aspect_ratio, fn data, acc ->
+        [head | tail] = acc
+
+        Map.merge(template.opt, %{
+          url: data.media_url_https,
+          ratio: head
+        })
+        |> list_push(tail)
+      end)
+      |> flex_images
+      |> social_contents
+
+    %{hero: %{ template.hero | contents: contents }}
   end
 
-  defp new_flex_hero(media) do
-    media_url = extract_media_url(media)
-    content =
-      media_url
-      |> new_flex_image(new_flex_action("postback", media_url))
+  defp social_contents do
+    [
+      %{
+        type: "box",
+        layout: "vertical",
+        contents: []
+      },
+      %{
+        type: "box",
+        layout: "vertical",
+        contents: []
+      }
+    ]
+  end
 
-    %{hero: content}
+  defp social_contents(opts) do
+    opts
+    |> Enum.reduce(social_contents, fn data, acc ->
+      [head | tail] = acc
+      update_contents = list_push(data, head.contents)
+      update_head = %{head | contents: update_contents}
+
+      cond do
+        length(opts) == 3 && Enum.at(opts, 1, %{}) |> Map.equal?(data) ->
+          [update_head | tail]
+        true -> update_head |> list_push(tail)
+      end
+    end)
+    |> Enum.filter(&Enum.any?(&1.contents))
+  end
+
+  defp social_aspect_ratio(length) do
+    case length do
+      1 ->
+        ["150:98"]
+      2 ->
+        ["150:196", "150:196"]
+      3 ->
+        ["150:196", "150:98", "150:98"]
+      4 ->
+        ["150:98", "150:98", "150:98", "150:98"]
+      _ -> []
+    end
   end
 
   defp format_flex_message(tweet) do
@@ -125,7 +192,7 @@ defmodule TwitterCastWeb.BotController do
       user: %{
         name: name,
         screen_name: screen_name,
-        profile_image_url_https: profile_image_url
+        profile_image_url_https: url
       }
     } = tweet = Map.from_struct(tweet)
 
@@ -159,7 +226,7 @@ defmodule TwitterCastWeb.BotController do
             contents: [
               %{
                 type: "image",
-                url: String.replace(profile_image_url, "_normal", "_bigger"),
+                url: String.replace(url, "_normal", "_bigger"),
                 size: "full",
                 aspectMode: "cover"
               }
@@ -207,7 +274,7 @@ defmodule TwitterCastWeb.BotController do
 
     case tweet[:extended_entities] do
       %{media: media} ->
-        %{template | contents: Map.merge(contents, new_flex_hero(media))}
+        %{template | contents: Map.merge(contents, flex_social media)}
       nil ->
         %{template | contents: contents}
     end
