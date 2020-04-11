@@ -92,7 +92,7 @@ defmodule TwitterCastWeb.BotController do
 
   defp flex_image(opt, action) do
     opt
-    |> new_image
+    |> flex_image
     |> Map.merge(action)
   end
 
