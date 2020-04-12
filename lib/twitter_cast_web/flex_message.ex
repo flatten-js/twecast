@@ -27,7 +27,7 @@ defmodule TwitterCastWeb.FlexMessage do
   @spec new_images([image_opt, ...]) :: [map]
   def new_images(opts) do
     opts |> Enum.map(fn opt ->
-      new_image opt, new_postback("postback", opt.url)
+      new_image opt, new_postback(opt.url)
     end)
   end
 
