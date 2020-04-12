@@ -42,13 +42,13 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @spec new_hero :: map
-  def new_hero do
+  @spec new_hero([map] | map) :: map
+  def new_hero(contents) do
     %{
       hero: %{
         type: "box",
         layout: "horizontal",
-        contents: []
+        contents: List.flatten [contents]
       }
     }
   end
@@ -72,19 +72,17 @@ defmodule TwitterCastWeb.FlexMessage do
   def new_social(media) do
     ratios = prescribed_ratios(length media)
 
-    contents =
-      media |> Enum.reduce(ratios, fn data, acc ->
-        [head | tail] = acc
+    media |> Enum.reduce(ratios, fn data, acc ->
+      [head | tail] = acc
 
-        Map.merge(@image_opt, %{
-          url: data.media_url_https,
-          ratio: head
-        }) |> list_push(tail)
-      end)
-      |> new_images()
-      |> new_social_contents()
-
-    %{new_hero() | hero: %{contents: contents}}
+      Map.merge(@image_opt, %{
+        url: data.media_url_https,
+        ratio: head
+      }) |> list_push(tail)
+    end)
+    |> new_images()
+    |> new_social_contents()
+    |> new_hero()
   end
 
   @spec new_social_contents :: [map, ...]
