@@ -1,5 +1,5 @@
 defmodule TwitterCastWeb.FlexMessage do
-  @image_opt %{url: "", ratio: "", mode: ""}
+  @image_opt %{url: "", ratio: "", mode: "cover"}
 
   @type string_t :: String.t()
   @type image_opt :: %{url: string_t, ratio: string_t, mode: string_t}
