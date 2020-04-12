@@ -20,8 +20,8 @@ defmodule TwitterCastWeb.FlexMessage do
   @spec new_image(image_opt, map) :: map
   def new_image(opt, action) do
     opt
-    |> new_image
-    |> Map.merge action
+    |> new_image()
+    |> Map.merge(action)
   end
 
   @spec new_images([image_opt, ...]) :: [map]
@@ -79,12 +79,12 @@ defmodule TwitterCastWeb.FlexMessage do
         Map.merge(@image_opt, %{
           url: data.media_url_https,
           ratio: head
-        }) |> list_push tail
+        }) |> list_push(tail)
       end)
-      |> new_images
-      |> new_social_contents
+      |> new_images()
+      |> new_social_contents()
 
-    %{new_hero | hero: %{contents: contents}}
+    %{new_hero() | hero: %{contents: contents}}
   end
 
   @spec new_social_contents(none) :: [map, ...]
@@ -105,7 +105,7 @@ defmodule TwitterCastWeb.FlexMessage do
 
   @spec new_social_contents([map, ...]) :: [map]
   def new_social_contents(images) do
-    images |> Enum.reduce(new_social_contents, fn image, acc ->
+    images |> Enum.reduce(new_social_contents(), fn image, acc ->
       [head | tail] = acc
       update_contents = list_push(image, head.contents)
       update_head = %{head | contents: update_contents}
@@ -115,7 +115,7 @@ defmodule TwitterCastWeb.FlexMessage do
           Enum.at(images, 1, %{}) |> Map.equal?(image)
         ) ->
           [update_head | tail]
-        true -> update_head |> list_push tail
+        true -> update_head |> list_push(tail)
       end
     end) |> Enum.filter(&Enum.any?(&1.contents))
   end
