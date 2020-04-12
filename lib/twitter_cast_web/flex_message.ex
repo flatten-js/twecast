@@ -42,7 +42,7 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @spec new_hero(none) :: map
+  @spec new_hero :: map
   def new_hero do
     %{
       hero: %{
@@ -87,7 +87,7 @@ defmodule TwitterCastWeb.FlexMessage do
     %{new_hero() | hero: %{contents: contents}}
   end
 
-  @spec new_social_contents(none) :: [map, ...]
+  @spec new_social_contents :: [map, ...]
   def new_social_contents do
     [
       %{
