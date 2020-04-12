@@ -85,4 +85,15 @@ defmodule TwitterCastWeb.BotController do
   However, it is unknown at this stage whether it is efficient
   """
   def list_push(data, list), do: [list | [data]] |> List.flatten
+
+  @doc """
+  Remove map values ​​that are nil
+  """
+  def map_filter(map) do
+    Map.keys(map)
+    |> Enum.reduce(map, fn key, acc ->
+      if acc[key] == nil,
+        do: Map.delete(acc, key), else: acc
+    end)
+  end
 end

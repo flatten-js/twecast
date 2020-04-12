@@ -4,7 +4,7 @@ defmodule TwitterCastWeb.FlexMessage do
   @type string_t :: String.t()
   @type image_opt :: %{url: string_t, ratio: string_t, mode: string_t}
 
-  import TwitterCastWeb.BotController, only: [list_push: 2]
+  import TwitterCastWeb.BotController, only: [list_push: 2, map_filter: 1]
 
   @spec new_image(image_opt) :: map
   def new_image(opt) do
@@ -42,14 +42,34 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
+  @spec new_vertical([map] | map, map) :: map
+  def new_vertical(contents, opt) do
+    %{
+      type: "box",
+      layout: "vertical",
+      contents: List.flatten([contents]),
+      spacing: opt[:spacing]
+    } |> map_filter
+  end
+
+  @spec new_horizontal([map] | map, map) :: map
+  def new_horizontal(contents, opt) do
+    %{
+      type: "box",
+      layout: "horizontal",
+      contents: List.flatten([contents]),
+      height: opt[:height],
+      spacing: opt[:spacing]
+    } |> map_filter
+  end
+
   @spec new_hero([map] | map) :: map
   def new_hero(contents) do
     %{
-      hero: %{
-        type: "box",
-        layout: "horizontal",
-        contents: List.flatten [contents]
-      }
+      hero: new_horizontal(contents, %{
+        height: "192px",
+        spacing: "sm"
+      })
     }
   end
 
@@ -87,18 +107,8 @@ defmodule TwitterCastWeb.FlexMessage do
 
   @spec new_social_contents :: [map, ...]
   def new_social_contents do
-    [
-      %{
-        type: "box",
-        layout: "vertical",
-        contents: []
-      },
-      %{
-        type: "box",
-        layout: "vertical",
-        contents: []
-      }
-    ]
+    new_vertical([], %{spacing: "sm"})
+    |> List.duplicate(2)
   end
 
   @spec new_social_contents([map, ...]) :: [map]
