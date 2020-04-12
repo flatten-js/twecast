@@ -4,6 +4,8 @@ defmodule TwitterCastWeb.FlexMessage do
   @type string :: String.t()
   @type image_opt :: %{url: string, ratio: string, mode: string}
 
+  import TwitterCastWeb.BotController, only: [list_push: 2]
+
   @spec new_image(image_opt) :: map
   def new_image(opt) do
     %{
@@ -80,7 +82,7 @@ defmodule TwitterCastWeb.FlexMessage do
         }) |> list_push tail
       end)
       |> new_images
-      |>
+      |> new_social_contents
 
     %{new_hero | hero: %{contents: contents}}
   end
@@ -101,16 +103,16 @@ defmodule TwitterCastWeb.FlexMessage do
     ]
   end
 
-  @spec new_social_contents([image_opt, ...]) :: [map]
-  def new_social_contents(opts) do
-    opts |> Enum.reduce(new_social_contents, fn opt, acc ->
+  @spec new_social_contents([map, ...]) :: [map]
+  def new_social_contents(images) do
+    images |> Enum.reduce(new_social_contents, fn image, acc ->
       [head | tail] = acc
-      update_contents = list_push(opt, head.contents)
+      update_contents = list_push(image, head.contents)
       update_head = %{head | contents: update_contents}
 
       cond do
-        length(opts) == 3 && (
-          Enum.at(opts, 1, %{}) |> Map.equal?(opt)
+        length(images) == 3 && (
+          Enum.at(images, 1, %{}) |> Map.equal?(image)
         ) ->
           [update_head | tail]
         true -> update_head |> list_push tail
@@ -217,6 +219,4 @@ defmodule TwitterCastWeb.FlexMessage do
         %{flex | contents: contents}
     end
   end
-
-  def list_push(data, list), do: [list | [data]] |> List.flatten
 end
