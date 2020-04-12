@@ -67,7 +67,6 @@ defmodule TwitterCastWeb.FlexMessage do
   def new_hero(contents) do
     %{
       hero: new_horizontal(contents, %{
-        height: "192px",
         spacing: "sm"
       })
     }
