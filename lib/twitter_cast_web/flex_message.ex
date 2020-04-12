@@ -1,8 +1,8 @@
 defmodule TwitterCastWeb.FlexMessage do
   @image_opt %{url: "", ratio: "", mode: ""}
 
-  @type string :: String.t()
-  @type image_opt :: %{url: string, ratio: string, mode: string}
+  @type string_t :: String.t()
+  @type image_opt :: %{url: string_t, ratio: string_t, mode: string_t}
 
   import TwitterCastWeb.BotController, only: [list_push: 2]
 
@@ -31,7 +31,7 @@ defmodule TwitterCastWeb.FlexMessage do
     end)
   end
 
-  @spec new_postback(string) :: map
+  @spec new_postback(string_t) :: map
   def new_postback(data) do
     %{
       action: %{
@@ -53,7 +53,7 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @spec prescribed_ratios(integer) :: [string]
+  @spec prescribed_ratios(integer) :: [string_t]
   def prescribed_ratios(length) do
     case length do
       1 ->
@@ -120,7 +120,7 @@ defmodule TwitterCastWeb.FlexMessage do
     end) |> Enum.filter(&Enum.any?(&1.contents))
   end
 
-  @spec new_flex(string) :: map
+  @spec new_flex(string_t) :: map
   def new_flex(text) do
     %{
       type: "flex",
