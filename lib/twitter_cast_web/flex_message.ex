@@ -6,8 +6,8 @@ defmodule TwitterCastWeb.FlexMessage do
 
   import TwitterCastWeb.BotController, only: [list_push: 2, map_filter: 1]
 
-  @spec new_image(image_opt) :: map
-  def new_image(opt) do
+  @spec image(image_opt) :: map
+  def image(opt) do
     %{
       type: "image",
       url: opt.url,
@@ -17,22 +17,22 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @spec new_image(image_opt, map) :: map
-  def new_image(opt, action) do
+  @spec image(image_opt, map) :: map
+  def image(opt, action) do
     opt
-    |> new_image()
+    |> image()
     |> Map.merge(action)
   end
 
-  @spec new_images([image_opt, ...]) :: [map]
-  def new_images(opts) do
+  @spec images([image_opt, ...]) :: [map]
+  def images(opts) do
     opts |> Enum.map(fn opt ->
-      new_image opt, new_postback(opt.url)
+      image opt, postback(opt.url)
     end)
   end
 
-  @spec new_postback(string_t) :: map
-  def new_postback(data) do
+  @spec postback(string_t) :: map
+  def postback(data) do
     %{
       action: %{
         type: "postback",
@@ -42,8 +42,8 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @spec new_vertical([map] | map, map) :: map
-  def new_vertical(contents, opt) do
+  @spec vertical([map] | map, map) :: map
+  def vertical(contents, opt) do
     %{
       type: "box",
       layout: "vertical",
@@ -52,8 +52,8 @@ defmodule TwitterCastWeb.FlexMessage do
     } |> map_filter
   end
 
-  @spec new_horizontal([map] | map, map) :: map
-  def new_horizontal(contents, opt) do
+  @spec horizontal([map] | map, map) :: map
+  def horizontal(contents, opt) do
     %{
       type: "box",
       layout: "horizontal",
@@ -63,10 +63,10 @@ defmodule TwitterCastWeb.FlexMessage do
     } |> map_filter
   end
 
-  @spec new_hero([map] | map) :: map
-  def new_hero(contents) do
+  @spec hero([map] | map) :: map
+  def hero(contents) do
     %{
-      hero: new_horizontal(contents, %{
+      hero: horizontal(contents, %{
         spacing: "sm"
       })
     }
@@ -87,8 +87,8 @@ defmodule TwitterCastWeb.FlexMessage do
     end
   end
 
-  @spec new_social([map, ...]) :: map
-  def new_social(media) do
+  @spec social([map, ...]) :: map
+  def social(media) do
     ratios = prescribed_ratios(length media)
 
     media |> Enum.reduce(ratios, fn data, acc ->
@@ -99,20 +99,20 @@ defmodule TwitterCastWeb.FlexMessage do
         ratio: head
       }) |> list_push(tail)
     end)
-    |> new_images()
-    |> new_social_contents()
-    |> new_hero()
+    |> images()
+    |> social_contents()
+    |> hero()
   end
 
-  @spec new_social_contents :: [map, ...]
-  def new_social_contents do
-    new_vertical([], %{spacing: "sm"})
+  @spec social_contents :: [map, ...]
+  def social_contents do
+    vertical([], %{spacing: "sm"})
     |> List.duplicate(2)
   end
 
-  @spec new_social_contents([map, ...]) :: [map]
-  def new_social_contents(images) do
-    images |> Enum.reduce(new_social_contents(), fn image, acc ->
+  @spec social_contents([map, ...]) :: [map]
+  def social_contents(images) do
+    images |> Enum.reduce(social_contents(), fn image, acc ->
       [head | tail] = acc
       update_contents = list_push(image, head.contents)
       update_head = %{head | contents: update_contents}
@@ -127,8 +127,8 @@ defmodule TwitterCastWeb.FlexMessage do
     end) |> Enum.filter(&Enum.any?(&1.contents))
   end
 
-  @spec new_flex(string_t) :: map
-  def new_flex(text) do
+  @spec flex(string_t) :: map
+  def flex(text) do
     %{
       type: "flex",
       altText: text,
@@ -147,7 +147,7 @@ defmodule TwitterCastWeb.FlexMessage do
       }
     } = tweet = Map.from_struct(tweet)
 
-    flex = new_flex "call: #{text}"
+    flex = flex "call: #{text}"
 
     contents = %{
       type: "bubble",
@@ -221,7 +221,7 @@ defmodule TwitterCastWeb.FlexMessage do
 
     case tweet[:extended_entities] do
       %{media: media} ->
-        %{flex | contents: Map.merge(contents, new_social media)}
+        %{flex | contents: Map.merge(contents, social media)}
       nil ->
         %{flex | contents: contents}
     end
