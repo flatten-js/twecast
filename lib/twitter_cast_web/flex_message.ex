@@ -13,9 +13,7 @@ defmodule TwitterCastWeb.FlexMessage do
     |> map_filter
   end
 
-  @doc """
-  Flex message object that is the basis of the data structure
-  """
+  # Flex message object that is the basis of the data structure
 
   defp flex(container, alt) do
     %{
@@ -25,16 +23,13 @@ defmodule TwitterCastWeb.FlexMessage do
     }
   end
 
-  @doc """
-  Three-layer data structure that makes up a flex message
-  """
-
+  # Three-layer data structure that makes up a flex message
   # --- structure: Container --- #
 
-  @doc """
-  Container: bubble
-  The container that displays a single message bubble
-  """
+  # @docp """
+  # Container: bubble
+  # The container that displays a single message bubble
+  # """
 
   defp bubble(blocks, opt) do
     %{
@@ -54,9 +49,7 @@ defmodule TwitterCastWeb.FlexMessage do
 
   # --- structure: Block --- #
 
-  @doc """
-  Block depends on container
-  """
+  # Note: Block depends on container
 
   # --- structure: Component --- #
 
@@ -64,20 +57,6 @@ defmodule TwitterCastWeb.FlexMessage do
   component: box
   The component that defines the layout of the component
   """
-
-  defp box(layout, contents, opt) do
-    %{
-      type: "box",
-      layout: layout,
-      contents: guarantee_list(contents)
-    }
-    |> Map.merge(box_opt opt)
-  end
-
-  defp box(layout, contents, opt, action) do
-    box(layout, contents, opt)
-    |> Map.merge(action)
-  end
 
   def box(contents, {:vertical, opt}) do
     box("vertical", contents, opt)
@@ -93,6 +72,22 @@ defmodule TwitterCastWeb.FlexMessage do
 
   def box(contents, {:horizontal, opt, action}) do
     box("horizontal", contents, opt, action)
+  end
+
+  # The underlying function
+
+  defp box(layout, contents, opt) do
+    %{
+      type: "box",
+      layout: layout,
+      contents: guarantee_list(contents)
+    }
+    |> Map.merge(box_opt opt)
+  end
+
+  defp box(layout, contents, opt, action) do
+    box(layout, contents, opt)
+    |> Map.merge(action)
   end
 
   @doc """
@@ -121,10 +116,6 @@ defmodule TwitterCastWeb.FlexMessage do
   end
 
   # --- Option --- #
-
-  @doc """
-  Options used in flex messages
-  """
 
   defp box_opt(opt) do
     %{
@@ -206,7 +197,7 @@ defmodule TwitterCastWeb.FlexMessage do
   # --- Action --- #
 
   @doc """
-  Actions used in flex messages
+  Action to take when the user taps a control in the message
   """
 
   def action({:postback, data}) do
@@ -229,10 +220,8 @@ defmodule TwitterCastWeb.FlexMessage do
 
   # --- Helper function --- #
 
-  @doc """
-  removes values ​​determined as false from the map
-  """
-  def map_filter({:ok, map}) do
+  # removes values ​​determined as false from the map
+  defp map_filter({:ok, map}) do
     Map.keys(map)
     |> Enum.reduce(map, fn key, acc ->
       v = acc[key]
@@ -249,17 +238,13 @@ defmodule TwitterCastWeb.FlexMessage do
     end)
   end
 
-  def map_filter(v) do
+  defp map_filter(v) do
     if is_map(v), do: map_filter({:ok, v}), else: v
   end
 
-  @doc """
-  Guarantees that the values ​​sent will always be a list
-  """
-  def guarantee_list(v), do: List.flatten [v]
+  # Guarantees that the values ​​sent will always be a list
+  defp guarantee_list(v), do: List.flatten [v]
 
-  @doc """
-  Add an element to the beginning of alist
-  """
+  # Add an element to the beginning of alist
   def alist_unshift(v, atom, alist), do: [{atom, v} | alist]
 end
