@@ -1,229 +1,265 @@
 defmodule TwitterCastWeb.FlexMessage do
-  @image_opt %{url: "", ratio: "", mode: "cover"}
+  @moduledoc """
+  Module for building flex messages
+  """
 
-  @type string_t :: String.t()
-  @type image_opt :: %{url: string_t, ratio: string_t, mode: string_t}
+  @doc """
+  Create a new flex message
+  """
 
-  import TwitterCastWeb.BotController, only: [list_push: 2, map_filter: 1]
+  def new(blocks, alt, {:bubble, opt}) do
+    bubble(blocks, opt)
+    |> flex(alt)
+    |> map_filter
+  end
 
-  @spec image(image_opt) :: map
-  def image(opt) do
+  @doc """
+  Flex message object that is the basis of the data structure
+  """
+
+  defp flex(container, alt) do
     %{
-      type: "image",
-      url: opt.url,
-      aspectRatio: opt.ratio,
-      aspectMode: opt.mode,
-      size: "full"
+      type: "flex",
+      altText: alt,
+      contents: container
     }
   end
 
-  @spec image(image_opt, map) :: map
-  def image(opt, action) do
-    opt
-    |> image()
+  @doc """
+  Three-layer data structure that makes up a flex message
+  """
+
+  # --- structure: Container --- #
+
+  @doc """
+  Container: bubble
+  The container that displays a single message bubble
+  """
+
+  defp bubble(blocks, opt) do
+    %{
+      type: "bubble",
+      header: blocks[:header],
+      hero: blocks[:hero],
+      body: blocks[:body],
+      footer: blocks[:footer],
+      styles: %{
+        header: opt[:header],
+        hero: opt[:hero],
+        body: opt[:body],
+        footer: opt[:footer]
+      }
+    }
+  end
+
+  # --- structure: Block --- #
+
+  @doc """
+  Block depends on container
+  """
+
+  # --- structure: Component --- #
+
+  @doc """
+  component: box
+  The component that defines the layout of the component
+  """
+
+  defp box(layout, contents, opt) do
+    %{
+      type: "box",
+      layout: layout,
+      contents: guarantee_list(contents)
+    }
+    |> Map.merge(box_opt opt)
+  end
+
+  defp box(layout, contents, opt, action) do
+    box(layout, contents, opt)
     |> Map.merge(action)
   end
 
-  @spec images([image_opt, ...]) :: [map]
-  def images(opts) do
-    opts |> Enum.map(fn opt ->
-      image opt, postback(opt.url)
-    end)
+  def box(contents, {:vertical, opt}) do
+    box("vertical", contents, opt)
   end
 
-  @spec postback(string_t) :: map
-  def postback(data) do
+  def box(contents, {:vertical, opt, action}) do
+    box("vertical", contents, opt, action)
+  end
+
+  def box(contents, {:horizontal, opt}) do
+    box("horizontal", contents, opt)
+  end
+
+  def box(contents, {:horizontal, opt, action}) do
+    box("horizontal", contents, opt, action)
+  end
+
+  @doc """
+  component: image
+  The component that draws the image
+  """
+
+  def image(url, opt) do
+    %{ type: "image", url: url }
+    |> Map.merge(image_opt opt)
+  end
+
+  def image(url, opt, action) do
+    image(url, opt)
+    |> Map.merge(action)
+  end
+
+  @doc """
+  copmonent: text
+  The component that draws a string of one line
+  """
+
+  def text(text, opt) do
+    %{type: "text", text: text}
+    |> Map.merge(text_opt opt)
+  end
+
+  # --- Option --- #
+
+  @doc """
+  Options used in flex messages
+  """
+
+  defp box_opt(opt) do
+    %{
+      spacing: opt[:spacing],
+      width: opt[:width],
+      height: opt[:height],
+      borderWidth: opt[:border_width],
+      borderColor: opt[:border_color],
+      cornerRadius: opt[:corner_radius]
+    }
+    |> Map.merge(base_opt opt, except: [:gravity, :size, :align])
+    |> Map.merge(offset_opt opt)
+    |> Map.merge(padding_opt opt)
+  end
+
+  defp image_opt(opt) do
+    %{
+      aspectRatio: opt[:aspect_ratio],
+      aspectMode: opt[:aspect_mode]
+    }
+    |> Map.merge(base_opt opt)
+    |> Map.merge(offset_opt opt)
+  end
+
+  defp text_opt(opt) do
+    %{
+      weight: opt[:weight],
+      color: opt[:color],
+      style: opt[:style],
+      decoration: opt[:decoration],
+      wrap: opt[:wrap],
+      maxLines: opt[:max_lines]
+    }
+    |> Map.merge(base_opt opt, except: [:backgroundColor])
+    |> Map.merge(offset_opt opt)
+  end
+
+  defp base_opt(opt) do
+    %{
+      flex: opt[:flex],
+      position: opt[:position],
+      margin: opt[:margin],
+      align: opt[:align],
+      gravity: opt[:gravity],
+      size: opt[:size],
+      backgroundColor: opt[:background_color]
+    }
+  end
+
+  defp base_opt(opt, [only: keys]) do
+    base_opt(opt) |> Map.take(keys)
+  end
+
+  defp base_opt(opt, [except: keys]) do
+    base_opt(opt)
+    |> Map.split(keys)
+    |> case do {_, map} -> map end
+  end
+
+  defp offset_opt(opt) do
+    %{
+      offsetTop: opt[:offset_top],
+      offsetBottom: opt[:offset_bottom],
+      offsetStart: opt[:offset_start],
+      offsetEnd: opt[:offset_end]
+    }
+  end
+
+  defp padding_opt(opt) do
+    %{
+      paddingAll: opt[:padding_all],
+      paddingTop: opt[:padding_top],
+      paddingBottom: opt[:padding_bottom],
+      paddingStart: opt[:padding_start],
+      paddingEnd: opt[:padding_end]
+    }
+  end
+
+  # --- Action --- #
+
+  @doc """
+  Actions used in flex messages
+  """
+
+  def action({:postback, data}) do
     %{
       action: %{
         type: "postback",
-        label: "postback",
         data: data
       }
     }
   end
 
-  @spec vertical([map] | map, map) :: map
-  def vertical(contents, opt) do
+  def action({:uri, uri}) do
     %{
-      type: "box",
-      layout: "vertical",
-      contents: List.flatten([contents]),
-      spacing: opt[:spacing]
-    } |> map_filter
-  end
-
-  @spec horizontal([map] | map, map) :: map
-  def horizontal(contents, opt) do
-    %{
-      type: "box",
-      layout: "horizontal",
-      contents: List.flatten([contents]),
-      height: opt[:height],
-      spacing: opt[:spacing]
-    } |> map_filter
-  end
-
-  @spec hero([map] | map) :: map
-  def hero(contents) do
-    %{
-      hero: horizontal(contents, %{
-        spacing: "sm"
-      })
+      action: %{
+        type: "uri",
+        uri: uri
+      }
     }
   end
 
-  @spec prescribed_ratios(integer) :: [string_t]
-  def prescribed_ratios(length) do
-    case length do
-      1 ->
-        ["150:98"]
-      2 ->
-        ["150:200", "150:200"]
-      3 ->
-        ["150:200", "150:98", "150:98"]
-      4 ->
-        ["150:98", "150:98", "150:98", "150:98"]
-      _ -> []
-    end
-  end
+  # --- Helper function --- #
 
-  @spec social([map, ...]) :: map
-  def social(media) do
-    ratios = prescribed_ratios(length media)
-
-    media |> Enum.reduce(ratios, fn data, acc ->
-      [head | tail] = acc
-
-      Map.merge(@image_opt, %{
-        url: data.media_url_https,
-        ratio: head
-      }) |> list_push(tail)
-    end)
-    |> images()
-    |> social_contents()
-    |> hero()
-  end
-
-  @spec social_contents :: [map, ...]
-  def social_contents do
-    vertical([], %{spacing: "sm"})
-    |> List.duplicate(2)
-  end
-
-  @spec social_contents([map, ...]) :: [map]
-  def social_contents(images) do
-    images |> Enum.reduce(social_contents(), fn image, acc ->
-      [head | tail] = acc
-      update_contents = list_push(image, head.contents)
-      update_head = %{head | contents: update_contents}
-
+  @doc """
+  removes values ​​determined as false from the map
+  """
+  def map_filter({:ok, map}) do
+    Map.keys(map)
+    |> Enum.reduce(map, fn key, acc ->
+      v = acc[key]
       cond do
-        length(images) == 3 && (
-          Enum.at(images, 1, %{}) |> Map.equal?(image)
-        ) ->
-          [update_head | tail]
-        true -> update_head |> list_push(tail)
+        !v ->
+          Map.delete(acc, key)
+        is_list(v) ->
+          Map.put(acc, key, Enum.map(v, &map_filter/1))
+        is_map(v) ->
+          Map.put(acc, key, map_filter(v))
+        true ->
+          acc
       end
-    end) |> Enum.filter(&Enum.any?(&1.contents))
+    end)
   end
 
-  @spec flex(string_t) :: map
-  def flex(text) do
-    %{
-      type: "flex",
-      altText: text,
-      contents: %{}
-    }
+  def map_filter(v) do
+    if is_map(v), do: map_filter({:ok, v}), else: v
   end
 
-  @spec template_message(%ExTwitter.Model.Tweet{}) :: map
-  def template_message(tweet) do
-    %{
-      full_text: text,
-      user: %{
-        name: name,
-        screen_name: screen_name,
-        profile_image_url_https: profile_url
-      }
-    } = tweet = Map.from_struct(tweet)
+  @doc """
+  Guarantees that the values ​​sent will always be a list
+  """
+  def guarantee_list(v), do: List.flatten [v]
 
-    flex = flex "call: #{text}"
-
-    contents = %{
-      type: "bubble",
-      body: %{
-        type: "box",
-        layout: "vertical",
-        contents: [
-          %{
-            type: "text",
-            text: text,
-            wrap: true
-          }
-        ],
-        paddingAll: "16px"
-      },
-      footer: %{
-        type: "box",
-        layout: "horizontal",
-        contents: [
-          %{
-            type: "box",
-            layout: "vertical",
-            contents: [
-              %{
-                type: "image",
-                url: String.replace(profile_url, "_normal", "_bigger"),
-                size: "full",
-                aspectMode: "cover"
-              }
-            ],
-            cornerRadius: "22.5px",
-            backgroundColor: "#cccccc",
-            width: "45px",
-            height: "45px"
-          },
-          %{
-            type: "box",
-            layout: "vertical",
-            contents: [
-              %{
-                type: "text",
-                text: name,
-                flex: 1,
-                gravity: "bottom"
-              },
-              %{
-                type: "text",
-                text: "@#{screen_name}",
-                size: "sm",
-                flex: 1,
-                gravity: "top"
-              }
-            ],
-            spacing: "xs"
-          }
-        ],
-        spacing: "xl",
-        paddingAll: "16px",
-        action: %{
-          type: "uri",
-          label: "uri",
-          uri: "https://twitter.com/#{screen_name}"
-        }
-      },
-      styles: %{
-        footer: %{
-          separator: true
-        }
-      }
-    }
-
-    case tweet[:extended_entities] do
-      %{media: media} ->
-        %{flex | contents: Map.merge(contents, social media)}
-      nil ->
-        %{flex | contents: contents}
-    end
-  end
+  @doc """
+  Add an element to the beginning of alist
+  """
+  def alist_unshift(v, atom, alist), do: [{atom, v} | alist]
 end
