@@ -1,5 +1,5 @@
-defmodule TwitterCastWeb.ErrorView do
-  use TwitterCastWeb, :view
+defmodule TwecastWeb.ErrorView do
+  use TwecastWeb, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

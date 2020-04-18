@@ -1,4 +1,4 @@
-defmodule TwitterCastWeb.ChannelCase do
+defmodule TwecastWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -11,7 +11,7 @@ defmodule TwitterCastWeb.ChannelCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use TwitterCastWeb.ChannelCase, async: true`, although
+  by setting `use TwecastWeb.ChannelCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -23,7 +23,7 @@ defmodule TwitterCastWeb.ChannelCase do
       use Phoenix.ChannelTest
 
       # The default endpoint for testing
-      @endpoint TwitterCastWeb.Endpoint
+      @endpoint TwecastWeb.Endpoint
     end
   end
 

@@ -8,11 +8,11 @@
 use Mix.Config
 
 # Configures the endpoint
-config :twitter_cast, TwitterCastWeb.Endpoint,
+config :twecast, TwecastWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "kPhxPlkyhwsXzP04Yw6TgqK7a+SVp23KnenhOYSDiggJKu3a7veVY1C9C+iO9xcj",
-  render_errors: [view: TwitterCastWeb.ErrorView, accepts: ~w(json)],
-  pubsub: [name: TwitterCast.PubSub, adapter: Phoenix.PubSub.PG2],
+  render_errors: [view: TwecastWeb.ErrorView, accepts: ~w(json)],
+  pubsub: [name: Twecast.PubSub, adapter: Phoenix.PubSub.PG2],
   live_view: [signing_salt: "kpIknFaW"]
 
 # Configures Elixir's Logger

@@ -1,9 +1,9 @@
-defmodule TwitterCast.MixProject do
+defmodule Twecast.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :twitter_cast,
+      app: :twecast,
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule TwitterCast.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {TwitterCast.Application, []},
+      mod: {Twecast.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

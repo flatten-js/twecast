@@ -1,15 +1,15 @@
-defmodule TwitterCastWeb.Router do
-  use TwitterCastWeb, :router
+defmodule TwecastWeb.Router do
+  use TwecastWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api", TwitterCastWeb do
+  scope "/api", TwecastWeb do
     pipe_through :api
   end
 
-  scope "/", TwitterCastWeb do
+  scope "/", TwecastWeb do
     post "/callback", BotController, :line_callback
   end
 end

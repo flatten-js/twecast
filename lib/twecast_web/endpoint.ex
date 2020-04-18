@@ -1,16 +1,16 @@
-defmodule TwitterCastWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :twitter_cast
+defmodule TwecastWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :twecast
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_twitter_cast_key",
+    key: "_twecast_key",
     signing_salt: "l8mZ/VMF"
   ]
 
-  socket "/socket", TwitterCastWeb.UserSocket,
+  socket "/socket", TwecastWeb.UserSocket,
     websocket: true,
     longpoll: false
 
@@ -20,7 +20,7 @@ defmodule TwitterCastWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :twitter_cast,
+    from: :twecast,
     gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
@@ -41,5 +41,5 @@ defmodule TwitterCastWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug TwitterCastWeb.Router
+  plug TwecastWeb.Router
 end

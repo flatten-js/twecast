@@ -1,4 +1,4 @@
-defmodule TwitterCastWeb.FlexMessage do
+defmodule TwecastWeb.FlexMessage do
   @moduledoc """
   Module for building flex messages
   """

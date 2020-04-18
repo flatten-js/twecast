@@ -1,4 +1,4 @@
-# TwitterCast
+# Twecast
 
 To start your Phoenix server:
 

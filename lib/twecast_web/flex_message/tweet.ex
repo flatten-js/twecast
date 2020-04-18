@@ -1,6 +1,6 @@
-defmodule TwitterCastWeb.FlexMessage.Tweet do
-  import TwitterCastWeb.BotController, only: [list_push: 2]
-  import TwitterCastWeb.FlexMessage
+defmodule TwecastWeb.FlexMessage.Tweet do
+  import TwecastWeb.BotController, only: [list_push: 2]
+  import TwecastWeb.FlexMessage
 
   @color_white "#ffffff"
   @color_gray "#8899a6"

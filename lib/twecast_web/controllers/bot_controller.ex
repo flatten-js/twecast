@@ -1,7 +1,7 @@
-defmodule TwitterCastWeb.BotController do
-  use TwitterCastWeb, :controller
+defmodule TwecastWeb.BotController do
+  use TwecastWeb, :controller
 
-  alias TwitterCastWeb.FlexMessage.Tweet
+  alias TwecastWeb.FlexMessage.Tweet
 
   def line_callback(conn, %{"events" => events}) do
     case events = List.first(events) do

@@ -1,12 +1,12 @@
-defmodule TwitterCastWeb do
+defmodule TwecastWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use TwitterCastWeb, :controller
-      use TwitterCastWeb, :view
+      use TwecastWeb, :controller
+      use TwecastWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,26 +19,26 @@ defmodule TwitterCastWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: TwitterCastWeb
+      use Phoenix.Controller, namespace: TwecastWeb
 
       import Plug.Conn
-      import TwitterCastWeb.Gettext
-      alias TwitterCastWeb.Router.Helpers, as: Routes
+      import TwecastWeb.Gettext
+      alias TwecastWeb.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/twitter_cast_web/templates",
-        namespace: TwitterCastWeb
+        root: "lib/twecast_web/templates",
+        namespace: TwecastWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
-      import TwitterCastWeb.ErrorHelpers
-      import TwitterCastWeb.Gettext
-      alias TwitterCastWeb.Router.Helpers, as: Routes
+      import TwecastWeb.ErrorHelpers
+      import TwecastWeb.Gettext
+      alias TwecastWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -53,7 +53,7 @@ defmodule TwitterCastWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import TwitterCastWeb.Gettext
+      import TwecastWeb.Gettext
     end
   end
 
