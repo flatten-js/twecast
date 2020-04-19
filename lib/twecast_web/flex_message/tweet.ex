@@ -14,7 +14,9 @@ defmodule TwecastWeb.FlexMessage.Tweet do
   end
 
   defp author_image(url) do
-    image(url, size: "full", aspect_mode: "cover")
+    url
+    |> String.replace("_normal", "_bigger")
+    |> image(size: "full", aspect_mode: "cover")
     |> box({:vertical, [
       width: "45px",
       height: "45px",
@@ -44,7 +46,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     text
     |> String.split(~r/\r|\r\n|\n/)
     |> Enum.map(fn word ->
-      text(word, color: @color_white)
+      text(word, color: @color_white, wrap: true)
     end)
     |> box({:vertical, %{}})
   end
