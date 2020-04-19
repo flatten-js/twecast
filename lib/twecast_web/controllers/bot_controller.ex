@@ -33,6 +33,7 @@ defmodule TwecastWeb.BotController do
       case reply do
         %{tid: tid} ->
           ExTwitter.show(tid, tweet_mode: "extended")
+          |> Map.from_struct()
           |> Tweet.new()
         _ -> reply
       end

@@ -112,7 +112,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
         screen_name: screen_name,
         profile_image_url_https: profile_image_url
       }
-    } = Map.from_struct(tweet)
+    } = tweet
 
     header =
       author(profile_image_url, name, screen_name)
