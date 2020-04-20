@@ -191,11 +191,12 @@ defmodule TwecastWeb.FlexMessage.Tweet do
         padding_top: "0px"
       ]})
 
-    [header: header, body: body, footer: footer]
-    |> new(text, {:bubble, [
-      header: %{backgroundColor: @color_dark},
-      body: %{backgroundColor: @color_dark},
-      footer: %{backgroundColor: @color_dark}
-    ]})
+    blocks = [header: header, body: body, footer: footer]
+
+    dark_styles =
+      Keyword.keys(blocks)
+      |> Enum.map(&({&1, %{backgroundColor: @color_dark}}))
+
+    new(blocks, text, {:bubble, dark_styles})
   end
 end
