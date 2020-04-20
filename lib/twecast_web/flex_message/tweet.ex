@@ -82,9 +82,12 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     end)
   end
 
-  defp date_format_jp!(ds) do
+  def date_format_jp!(ds) do
+    use Timex
+    tz = Timezone.get("Asia/Tokyo")
+
     Timex.parse!(ds, "%a %b %d %H:%M:%S %z %Y", :strftime)
-    |> Timex.local()
+    |> Timezone.convert(tz)
     |> Timex.format!("{h24}:{m} · {YYYY}年{M}月{D}日")
   end
 
