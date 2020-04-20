@@ -82,6 +82,23 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     end)
   end
 
+  defp date_format_jp!(ds) do
+    Timex.parse!(ds, "%a %b %d %H:%M:%S %z %Y", :strftime)
+    |> Timex.local()
+    |> Timex.format!("{am}{h12}:{m} · {YYYY}年{M}月{D}日")
+    |> time_zone_jp()
+  end
+
+  defp time_zone_jp(str) do
+    String.first(str)
+    |> case do
+      "a" ->
+        String.replace(str, "am", "午前")
+      "p" ->
+        String.replace(str, "pm", "午後")
+    end
+  end
+
   defp social_images(urls) do
     social_ratios(length urls)
     |> Enum.reduce(urls, fn ratio, acc ->
@@ -139,6 +156,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
 
   def new(tweet) do
     %{
+      created_at: created,
       full_text: text,
       user: %{
         name: name,
@@ -165,10 +183,19 @@ defmodule TwecastWeb.FlexMessage.Tweet do
         padding_top: "0px"
       ]})
 
-    [header: header, body: body]
+    footer =
+      date_format_jp!(created)
+      |> text(size: "sm", color: @color_gray)
+      |> box({:vertical, [
+        padding_all: "16px",
+        padding_top: "0px"
+      ]})
+
+    [header: header, body: body, footer: footer]
     |> new(text, {:bubble, [
       header: %{backgroundColor: @color_dark},
-      body: %{backgroundColor: @color_dark}
+      body: %{backgroundColor: @color_dark},
+      footer: %{backgroundColor: @color_dark}
     ]})
   end
 end

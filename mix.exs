@@ -40,7 +40,8 @@ defmodule Twecast.MixProject do
       {:httpoison, "~> 1.6"},
       {:poison, "~> 4.0"},
       {:oauther, "~> 1.1"},
-      {:extwitter, "~> 0.12.0"}
+      {:extwitter, "~> 0.12.0"},
+      {:timex, "~> 3.6"}
     ]
   end
 end
