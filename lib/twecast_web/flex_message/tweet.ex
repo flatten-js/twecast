@@ -43,30 +43,43 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     |> box({:vertical, spacing: "xs"})
   end
 
+  @crlf "\\r|\\r\\n|\\n"
+  @crlf_s "crlf"
+
   @at "@\\w+"
   @hash "#[^\\x00-\\x2f\\x3a-\\x40\\x5b-\\x5e\\x7b-\\x7e]+"
 
-  def tweet_text(text) do
-    text
-    |> String.split(~r/\r|\r\n|\n/)
+  defp tweet_text(text) do
+    Regex.compile!(@crlf)
+    |> Regex.split(text)
     |> Enum.map(fn line ->
-      "(?<=^|[^\\w#$%&*-@])(#{@at})|(?<=^|[^\\w&])(#{@hash})"
-      |> Regex.compile!()
-      |> Regex.split(line, include_captures: true)
-      |> Enum.filter(&byte_size(&1) != 0)
-      |> Enum.map(fn word ->
-        "^(#{@at})|(#{@hash})"
-        |> Regex.compile!()
-        |> Regex.match?(word)
-        |> if do
-          span(word, color: @color_blue)
-        else
-          span(word, color: @color_white)
-        end
-      end)
+      recycle_empty(line)
+      |> color_coding()
       |> text({:span, wrap: true})
     end)
     |> box({:vertical, %{}})
+  end
+
+  defp recycle_empty(text) do
+    if byte_size(text) == 0, do: @crlf_s, else: text
+  end
+
+  defp color_coding(text) do
+    "(?<=^|[^\\w#$%&*-@])(#{@at})|(?<=^|[^\\w&])(#{@hash})"
+    |> Regex.compile!()
+    |> Regex.split(text, include_captures: true)
+    |> Enum.filter(&byte_size(&1) != 0)
+    |> Enum.map(fn word ->
+      "^(#{@at})|(#{@hash})"
+      |> Regex.compile!()
+      |> Regex.match?(word)
+      |> case do
+        true -> @color_blue
+        false when @crlf_s == word -> @color_dark
+        false -> @color_white
+      end
+      |> (fn color -> span(word, color: color) end).()
+    end)
   end
 
   defp social_images(urls) do
