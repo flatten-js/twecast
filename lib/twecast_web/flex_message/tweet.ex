@@ -85,18 +85,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
   defp date_format_jp!(ds) do
     Timex.parse!(ds, "%a %b %d %H:%M:%S %z %Y", :strftime)
     |> Timex.local()
-    |> Timex.format!("{am}{h12}:{m} · {YYYY}年{M}月{D}日")
-    |> time_zone_jp()
-  end
-
-  defp time_zone_jp(str) do
-    String.first(str)
-    |> case do
-      "a" ->
-        String.replace(str, "am", "午前")
-      "p" ->
-        String.replace(str, "pm", "午後")
-    end
+    |> Timex.format!("{h24}:{m} · {YYYY}年{M}月{D}日")
   end
 
   defp social_images(urls) do
