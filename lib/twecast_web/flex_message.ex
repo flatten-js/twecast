@@ -110,9 +110,24 @@ defmodule TwecastWeb.FlexMessage do
   The component that draws a string of one line
   """
 
+  def text(contents, {:span, opt}) do
+    %{type: "text", contents: guarantee_list(contents)}
+    |> Map.merge(text_opt opt)
+  end
+
   def text(text, opt) do
     %{type: "text", text: text}
     |> Map.merge(text_opt opt)
+  end
+
+  @doc """
+  Component: span
+  The component that draws multiple character strings with different designs in one line
+  """
+
+  def span(text, opt) do
+    %{type: "span", text: text}
+    |> Map.merge(span_opt opt)
   end
 
   # --- Option --- #
@@ -140,17 +155,28 @@ defmodule TwecastWeb.FlexMessage do
     |> Map.merge(offset_opt opt)
   end
 
-  defp text_opt(opt) do
+  defp common_text_opt(opt) do
     %{
       weight: opt[:weight],
       color: opt[:color],
       style: opt[:style],
-      decoration: opt[:decoration],
+      decoration: opt[:decoration]
+    }
+  end
+
+  defp text_opt(opt) do
+    %{
       wrap: opt[:wrap],
       maxLines: opt[:max_lines]
     }
+    |> Map.merge(common_text_opt opt)
     |> Map.merge(base_opt opt, except: [:backgroundColor])
     |> Map.merge(offset_opt opt)
+  end
+
+  defp span_opt(opt) do
+    common_text_opt(opt)
+    |> Map.merge(base_opt opt, only: [:size])
   end
 
   defp base_opt(opt) do
