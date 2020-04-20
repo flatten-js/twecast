@@ -3,6 +3,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
   import TwecastWeb.FlexMessage
 
   @color_white "#ffffff"
+  @color_blue "#1b95e0"
   @color_gray "#8899a6"
   @color_dark "#15202b"
 
@@ -42,11 +43,28 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     |> box({:vertical, spacing: "xs"})
   end
 
-  defp tweet_text(text) do
+  @at "@\\w+"
+  @hash "#[^\\x00-\\x2f\\x3a-\\x40\\x5b-\\x5e\\x7b-\\x7e]+"
+
+  def tweet_text(text) do
     text
     |> String.split(~r/\r|\r\n|\n/)
-    |> Enum.map(fn word ->
-      text(word, color: @color_white, wrap: true)
+    |> Enum.map(fn line ->
+      "(?<=^|[^\\w#$%&*-@])(#{@at})|(?<=^|[^\\w&])(#{@hash})"
+      |> Regex.compile!()
+      |> Regex.split(line, include_captures: true)
+      |> Enum.filter(&byte_size(&1) != 0)
+      |> Enum.map(fn word ->
+        "^(#{@at})|(#{@hash})"
+        |> Regex.compile!()
+        |> Regex.match?(word)
+        |> if do
+          span(word, color: @color_blue)
+        else
+          span(word, color: @color_white)
+        end
+      end)
+      |> text({:span, wrap: true})
     end)
     |> box({:vertical, %{}})
   end
