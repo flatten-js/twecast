@@ -16,7 +16,7 @@ defmodule TwecastWeb.TweetLayout do
 
   defp author_image(url) do
     url
-    |> String.replace("_normal", "_bigger")
+    |> String.replace("_normal", "_400x400")
     |> image(size: "full", aspect_mode: "cover")
     |> box({:vertical, [
       width: "45px",
@@ -82,7 +82,8 @@ defmodule TwecastWeb.TweetLayout do
 
     Timex.parse!(ds, "%a %b %d %H:%M:%S %z %Y", :strftime)
     |> Timezone.convert(tz)
-    |> Timex.format!("{h24}:{m} · {YYYY}年{M}月{D}日")
+    |> Timex.format!("{_h24}:{m} · {YYYY}年{M}月{D}日")
+    |> String.trim()
   end
 
   defp social_images(urls) do
