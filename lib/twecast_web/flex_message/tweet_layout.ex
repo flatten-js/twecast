@@ -1,6 +1,6 @@
-defmodule TwecastWeb.FlexMessage.Tweet do
+defmodule TwecastWeb.TweetLayout do
   import TwecastWeb.BotController, only: [list_push: 2]
-  import TwecastWeb.FlexMessage
+  import Linex
 
   @color_white "#ffffff"
   @color_blue "#1b95e0"
@@ -10,7 +10,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
   defp author(url, name, sub) do
     twitter_url = "https://twitter.com/#{sub}"
     [author_image(url), author_names(name, sub)]
-    |> box({:horizontal, [spacing: "md"], action({:uri, twitter_url})})
+    |> box({:horizontal, spacing: "md", action: action({:uri, twitter_url})})
     |> box({:vertical, padding_all: "16px"})
   end
 
@@ -27,19 +27,13 @@ defmodule TwecastWeb.FlexMessage.Tweet do
 
   defp author_names(name, sub) do
     [
-      text(name, [
-        flex: 1,
-        size: "sm",
-        color: @color_white,
-        gravity: "bottom"
-      ]),
-      text("@#{sub}", [
-        flex: 1,
-        size: "sm",
-        color: @color_gray,
-        gravity: "top"
-      ])
+      {name, %{color: @color_white, gravity: "bottom"}},
+      {"@#{sub}", %{color: @color_gray, gravity: "top"}}
     ]
+    |> Enum.map(fn {name, opt} ->
+      opt = %{flex: 1, size: "sm"} |> Map.merge(opt)
+      text(name, opt)
+    end)
     |> box({:vertical, spacing: "xs"})
   end
 
@@ -82,7 +76,7 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     end)
   end
 
-  def date_format_jp!(ds) do
+  defp date_format_jp!(ds) do
     use Timex
     tz = Timezone.get("Asia/Tokyo")
 
@@ -96,13 +90,12 @@ defmodule TwecastWeb.FlexMessage.Tweet do
     |> Enum.reduce(urls, fn ratio, acc ->
       [head | tail] = acc
 
-      opt = %{
+      image(head, [
         aspect_ratio: ratio,
         aspect_mode: "cover",
-        size: "full"
-      }
-
-      image(head, opt, action({:postback, head}))
+        size: "full",
+        action: action({:postback, head})
+      ])
       |> list_push(tail)
     end)
     |> social_contents()

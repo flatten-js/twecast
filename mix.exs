@@ -41,7 +41,8 @@ defmodule Twecast.MixProject do
       {:poison, "~> 4.0"},
       {:oauther, "~> 1.1"},
       {:extwitter, "~> 0.12.0"},
-      {:timex, "~> 3.6"}
+      {:timex, "~> 3.6"},
+      {:linex, git: "https://github.com/flatten-js/linex.git"}
     ]
   end
 end

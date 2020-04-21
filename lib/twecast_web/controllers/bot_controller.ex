@@ -1,7 +1,7 @@
 defmodule TwecastWeb.BotController do
   use TwecastWeb, :controller
 
-  alias TwecastWeb.FlexMessage.Tweet
+  alias TwecastWeb.TweetLayout
 
   def line_callback(conn, %{"events" => events}) do
     case events = List.first(events) do
@@ -34,7 +34,7 @@ defmodule TwecastWeb.BotController do
         %{tid: tid} ->
           ExTwitter.show(tid, tweet_mode: "extended")
           |> Map.from_struct()
-          |> Tweet.new()
+          |> TweetLayout.new()
         _ -> reply
       end
 
