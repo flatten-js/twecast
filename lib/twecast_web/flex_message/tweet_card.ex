@@ -1,4 +1,4 @@
-defmodule TwecastWeb.TweetLayout do
+defmodule TwecastWeb.TweetCard do
   import TwecastWeb.BotController, only: [list_push: 2]
   import Linex
 

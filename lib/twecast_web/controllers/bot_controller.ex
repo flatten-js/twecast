@@ -1,7 +1,7 @@
 defmodule TwecastWeb.BotController do
   use TwecastWeb, :controller
 
-  alias TwecastWeb.TweetLayout
+  alias TwecastWeb.TweetCard
 
   def line_callback(conn, %{"events" => events}) do
     case events = List.first(events) do
@@ -34,7 +34,7 @@ defmodule TwecastWeb.BotController do
         %{tid: tid} ->
           ExTwitter.show(tid, tweet_mode: "extended")
           |> Map.from_struct()
-          |> TweetLayout.new()
+          |> TweetCard.new()
         _ -> reply
       end
 
