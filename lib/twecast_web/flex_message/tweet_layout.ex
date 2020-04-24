@@ -40,39 +40,63 @@ defmodule TwecastWeb.TweetLayout do
   @crlf "\\r|\\r\\n|\\n"
   @crlf_s "crlf"
 
-  @at "@\\w+"
-  @hash "#[^\\x00-\\x2f\\x3a-\\x40\\x5b-\\x5e\\x7b-\\x7e]+"
-
-  defp tweet_text(text) do
+  defp tweet_text(text, urls) do
     Regex.compile!(@crlf)
     |> Regex.split(text)
     |> Enum.map(fn line ->
-      recycle_empty(line)
-      |> color_coding()
+      embody_empty(line)
+      |> color_coding(urls)
       |> text({:span, wrap: true})
     end)
-    |> box({:vertical, %{}})
+    |> box({:vertical, []})
   end
 
-  defp recycle_empty(text) do
-    if byte_size(text) == 0, do: @crlf_s, else: text
+  defp is_byte?(b), do: byte_size(b) > 0
+
+  defp embody_empty(text) do
+    unless is_byte?(text), do: @crlf_s, else: text
   end
 
-  defp color_coding(text) do
-    "(?<=^|[^\\w#$%&*-@])(#{@at})|(?<=^|[^\\w&])(#{@hash})"
-    |> Regex.compile!()
-    |> Regex.split(text, include_captures: true)
-    |> Enum.filter(&byte_size(&1) != 0)
+  defp url_replace(text, urls) do
+    urls
+    |> Enum.reduce({text, []}, fn cur, {text, urls} ->
+      {
+        text |> String.replace(cur.url, cur.display_url),
+        cur.display_url |> list_push(urls)
+      }
+    end)
+  end
+
+  @at "@\\w+"
+  @at_comp "(?<=^|[^\\w#$%&*-@])(#{@at})"
+
+  @hash "#[^\\x00-\\x2f\\x3a-\\x40\\x5b-\\x5e\\x7b-\\x7e]+"
+  @hash_comp "(?<=^|[^\\w&])(#{@hash})"
+
+  @color_coding "#{@at_comp}|#{@hash_comp}"
+
+  def color_coding(text, opt \\ [])
+
+  def color_coding(text, opt) when length(opt) == 0,
+    do: color_coding!({:ok, @color_coding, text})
+
+  def color_coding(text, opt) do
+    rs = "#{@color_coding}|#{Enum.join(opt, "|")}"
+    color_coding!({:ok, rs, text})
+  end
+
+  defp color_coding!({:ok, rs, text}) do
+    r = Regex.compile!(rs)
+
+    Regex.split(r, text, include_captures: true)
+    |> Enum.filter(&is_byte?/1)
     |> Enum.map(fn word ->
-      "^(#{@at})|(#{@hash})"
-      |> Regex.compile!()
-      |> Regex.match?(word)
-      |> case do
+      case word =~ r do
         true -> @color_blue
         false when @crlf_s == word -> @color_dark
         false -> @color_white
       end
-      |> (fn color -> span(word, color: color) end).()
+      |> (&span(word, color: &1)).()
     end)
   end
 
@@ -144,6 +168,9 @@ defmodule TwecastWeb.TweetLayout do
     %{
       created_at: created,
       full_text: text,
+      entities: %{
+        urls: urls
+      },
       user: %{
         name: name,
         screen_name: screen_name,
@@ -151,8 +178,12 @@ defmodule TwecastWeb.TweetLayout do
       }
     } = tweet
 
+    {text, urls} = url_replace(text, urls)
+
     header =
       author(profile_image_url, name, screen_name)
+
+    tweet_text = tweet_text(text, urls)
 
     body =
       case tweet[:extended_entities] do
@@ -160,8 +191,8 @@ defmodule TwecastWeb.TweetLayout do
           media
           |> Enum.map(&(&1.media_url_https))
           |> social_images()
-          |> list_push([tweet_text(text)])
-        _ -> [tweet_text(text)]
+          |> list_push(tweet_text)
+        _ -> tweet_text
       end
       |> box({:vertical, [
         spacing: "xl",
