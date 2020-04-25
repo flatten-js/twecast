@@ -21,11 +21,12 @@ defmodule TwecastWeb.TweetCard do
       }
     } = tweet
 
-    {text, urls} = update_text(text, urls)
+    media = tweet[:extended_entities]
+    text = update_text(media, text, urls)
 
     blocks = [
       header: tweet_head(profile_image_url, name, screen_name),
-      body: tweet_body(tweet[:extended_entities], text, urls),
+      body: tweet_body(media, text, urls),
       footer: tweet_foot(created)
     ]
 
@@ -75,10 +76,11 @@ defmodule TwecastWeb.TweetCard do
 
   # --- body --- #
 
-  def tweet_body(media_exists, text, urls) do
+  def tweet_body(media, text, urls) do
+    urls = Enum.map(urls, &(&1.display_url))
     tweet_text = tweet_text(text, urls)
 
-    case media_exists do
+    case media do
       %{media: media} ->
         Enum.map(media, &(&1.media_url_https))
         |> social_images()
@@ -146,14 +148,24 @@ defmodule TwecastWeb.TweetCard do
     |> Enum.filter(&Enum.any?(&1.contents))
   end
 
-  def update_text(text, urls) do
-    urls
-    |> Enum.reduce({text, []}, fn cur, {text, urls} ->
-      {
-        text |> String.replace(cur.url, cur.display_url),
-        cur.display_url |> list_push(urls)
-      }
+  @url "https?:\\/\\/[\\w\\/$?.+-:%#&~=@]+"
+
+  def text_filter(text) do
+    "#{@url}$"
+    |> Regex.compile!()
+    |> Regex.replace(text, "")
+    |> String.trim()
+  end
+
+  def url_replace(text, urls) do
+    urls |> Enum.reduce(text, fn cur, acc ->
+      acc |> String.replace(cur.url, cur.display_url)
     end)
+  end
+
+  def update_text(media, text, urls) do
+    if(media, do: text_filter(text), else: text)
+    |> url_replace(urls)
   end
 
   @crlf "\\r|\\r\\n|\\n"
