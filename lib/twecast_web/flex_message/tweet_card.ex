@@ -34,7 +34,13 @@ defmodule TwecastWeb.TweetCard do
       Keyword.keys(blocks)
       |> Enum.map(&({&1, %{backgroundColor: @color_dark}}))
 
-    new(blocks, text, {:bubble, dark_styles})
+    new(blocks, alt_text(text), {:bubble, dark_styles})
+  end
+
+  @default_alt "Twecastが画像のみのツイートを送信しました"
+
+  def alt_text(text, default \\ @default_alt) do
+    unless is_byte?(text), do: default, else: text
   end
 
   # --- header --- #
