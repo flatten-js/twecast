@@ -84,7 +84,13 @@ defmodule TwecastWeb.TweetCard do
       %{media: media} ->
         Enum.map(media, &(&1.media_url_https))
         |> social_images()
-        |> list_push([tweet_text])
+        |> (&({&1, is_byte?(text)})).()
+        |> case do
+          {images, true} ->
+            images |> list_push(tweet_text)
+          {images, false} ->
+            [images]
+        end
       _ -> [tweet_text]
     end
     |> box({:vertical, [
