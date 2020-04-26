@@ -214,7 +214,8 @@ defmodule TwecastWeb.TweetCard do
     do: color_coding!({:ok, @color_coding, text})
 
   def color_coding(text, opt) do
-    rs = "#{@color_coding}|#{Enum.join(opt, "|")}"
+    opt = Enum.map_join(opt, "|", &Regex.escape/1)
+    rs = "#{@color_coding}|" <> opt
     color_coding!({:ok, rs, text})
   end
 
