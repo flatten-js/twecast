@@ -220,7 +220,7 @@ defmodule TwecastWeb.TweetCard do
   end
 
   defp color_coding!({:ok, rs, text}) do
-    r = Regex.compile!(rs)
+    r = Regex.compile!(rs, "u")
 
     Regex.split(r, text, include_captures: true)
     |> Enum.filter(&is_byte?/1)
